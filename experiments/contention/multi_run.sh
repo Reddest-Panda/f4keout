@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in {0...1...1}
+for i in `seq 1 100`
 do
     python3 run.py
 done
