@@ -9,13 +9,13 @@
 #include <sys/mman.h>
 
 //! ---- Variables ---- !//
-#define OFFSET 0x123
 #define ITS 5000
 
 char *mem;
 char err_msg[] = "Invalid arguments, proper use: [victim setting] [attacker setting]\n\nVictim and Attacker Options:\nw - Writes\nr - Reads\nf - Flushes\n";
 char vic_setting;
 char att_setting;
+u_int32_t OFFSET;
 
 //! ---- ASM Functions ---- !//
 static inline __attribute__((always_inline)) void mfence() {
@@ -155,25 +155,12 @@ void *attacker(void *args) {
 	// Timing Instructions on the Same and Different Offsets to the Victim
 	uint64_t start, end;
 	unsigned char *ptr_diff = mem + 0xABCD; // Different address as victim
-	unsigned char *ptr_same = mem + OFFSET; // Same address as victim
 	unsigned char *ptr_lower_match = mem + OFFSET + 0xA000; // Same lower 12 bits as victim
 
 	for (int i = 0; i < ITS; i++) {
 		start = rdtsc_begin();
 		mfence();
 		instruction(ptr_diff);
-		mfence();
-		end = rdtsc_end();
-		printf("%lu\n", end - start);
-	}
-
-	printf("|<END>|\n"); // Separater for data processing
-
-	for (int i = 0; i < ITS; i++) {
-		// Should be slow if theres contention
-		start = rdtsc_begin();
-		mfence();
-		instruction(ptr_same);
 		mfence();
 		end = rdtsc_end();
 		printf("%lu\n", end - start);
@@ -207,14 +194,14 @@ void *victim(void *args) {
 //! ---- Main ---- !//
 int main(int argc, char **argv[]) {
 	// Parameter Processing //
-	if (argc != 3) {
+	if (argc != 4) {
 		printf("%s", err_msg);
 		return EXIT_SUCCESS;
 	} else {
 		vic_setting = (char)argv[1][0];
 		att_setting = (char)argv[2][0];
+		OFFSET = atoi(argv[3]);
 	}
-
 
 	mem = (unsigned char *)mmap(NULL, 50 * 4096, 
 			PROT_READ | PROT_WRITE,
