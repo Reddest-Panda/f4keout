@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from tqdm import tqdm
 
 #! --- Small class for Measurements --- !#
 
@@ -94,29 +95,29 @@ all_cases = [options, options, addrs]
 timestamp = datetime.now()
 timestamp_data = timestamp.strftime('%d') + '_' + timestamp.strftime('%m') + '_' + timestamp.strftime('%Y') + '_' + timestamp.strftime('%H:%M:%S')
 
-# ## Setup for data collection
-# os.makedirs('data/tmp', exist_ok=True)
-# os.system("gcc -lpthread -w -O0 -o test contention.c")
+## Setup for data collection
+os.makedirs('data/tmp', exist_ok=True)
+os.system("gcc -lpthread -w -O0 -o test contention.c")
 
-# ## Collect Data
-# data = pd.DataFrame(columns=["vic", "att", "addr", "diff_avg", "lm_avg"])
-# vic = 'r'
-# att = 'r'   # Just attempting on one scenario for quicker results
-# for vic, att, addr in itertools.product(*all_cases): # Full sweep loop
-# # for addr in addrs:
-#     diff = []
-#     lm = []
-#     for _ in range(ITS):
-#         os.system(f"./test {vic} {att} {addr} > data/tmp/{vic}-{att}")
-#         readings = read_data(f'data/tmp/{vic}-{att}')
-#         diff.extend(readings[0])
-#         lm.extend(readings[1])
-#         time.sleep(0.2) # Buffer
-#     diff_avg, lm_avg = process(diff, lm)
-#     data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
+## Collect Data
+data = pd.DataFrame(columns=["vic", "att", "addr", "diff_avg", "lm_avg"])
+vic = 'r'
+att = 'r'   # Just attempting on one scenario for quicker results
+for vic, att, addr in tqdm(itertools.product(*all_cases)): # Full sweep loop
+# for addr in tqdm(addrs):
+    diff = []
+    lm = []
+    for _ in range(ITS):
+        os.system(f"./test {vic} {att} {addr} > data/tmp/{vic}-{att}")
+        readings = read_data(f'data/tmp/{vic}-{att}')
+        diff.extend(readings[0])
+        lm.extend(readings[1])
+        time.sleep(0.2) # Buffer
+    diff_avg, lm_avg = process(diff, lm)
+    data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
 
-# os.system("rm test")
-# # ## Saving / Graphing
-# data.to_csv(f"data/{timestamp_data}.csv")
-data = pd.read_csv("data/all_same_core.csv")
+os.system("rm test")
+# ## Saving / Graphing
+data.to_csv(f"data/{timestamp_data}.csv")
+# data = pd.read_csv("data/all_same_core.csv")
 graph_all(data, addrs)
