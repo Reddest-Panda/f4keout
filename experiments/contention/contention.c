@@ -12,7 +12,7 @@
 #define OFFSET 0x123
 #define ITS 5000
 #define THREAD1_CPU 0
-#define THREAD2_CPU 1
+#define THREAD2_CPU 8
 
 
 char *mem;

@@ -39,7 +39,7 @@ def parse_data(data):
     separated_data = []
     for vic in options:
         for att in options:
-            separated_data.append(data.loc[(data['vic'] == vic )& (data['att'] == att)])
+            separated_data.append(data.loc[(data['vic'] == vic ) & (data['att'] == att)])
     return separated_data
 
 def graph_scenario(data, addrs):
@@ -47,8 +47,11 @@ def graph_scenario(data, addrs):
     plt.scatter(addrs, data['diff_avg'].values, label='Diff', color='blue', linestyle='dotted')
     plt.scatter(addrs, data['lm_avg'], label='4k Aliasing', color='orange', linestyle='dotted')
 
+    hex_labels = [hex(addr) for addr in addrs]  # Format as hex (e.g., 0x1000)
+    plt.xticks(addrs, hex_labels, rotation=45)  # Rotate labels for better readability
+
     plt.legend()
-    plt.savefig("data/addr_effect.png")
+    plt.savefig("data/prefetching.png")
 
 def graph_all(data, addrs):
     # Create a figure with a 4x4 grid of subplots
@@ -75,13 +78,13 @@ def graph_all(data, addrs):
 
     # Adjust layout
     plt.tight_layout(rect=[0.05, 0.05, 1, 0.95])
-    plt.savefig("data/addr_effect.png")
+    plt.savefig("data/prefetching.png")
 
 
 #! --- Run Tests --- !#
 ITS = 25
 options = ['f', 'r', 'w', 'm']
-addrs = [n for n in range(0x000, 0x0005)] # Trying all offset values
+addrs = [n for n in range(0x123, 0xFF123, 0x01000)] # Trying all offset values
 all_cases = [options, options, addrs]
 
 timestamp = datetime.now()
@@ -93,9 +96,9 @@ os.system("gcc -lpthread -w -O0 -o test contention.c")
 
 ## Collect Data
 data = pd.DataFrame(columns=["vic", "att", "addr", "diff_avg", "lm_avg"])
-# for vic, att, addr in itertools.product(*all_cases):
 vic = 'r'
-att = 'r'
+att = 'r'   # Just attempting on one scenario for quicker results
+# for vic, att, addr in itertools.product(*all_cases): # Full sweep loop
 for addr in addrs:
     diff = []
     lm = []
@@ -104,11 +107,11 @@ for addr in addrs:
         readings = read_data(f'data/tmp/{vic}-{att}')
         diff.extend(readings[0])
         lm.extend(readings[1])
-        # time.sleep(0.3) # Buffer
+        # time.sleep(0.01) # Buffer
     diff_avg, lm_avg = process(diff, lm)
     data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
-os.system("rm test")
 
+os.system("rm test")
 ## Saving / Graphing
 data.to_csv(f"data/{timestamp_data}.csv")
 graph_scenario(data, addrs)

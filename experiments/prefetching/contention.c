@@ -12,6 +12,7 @@
 #define ITS 50000
 #define THREAD1_CPU 0
 #define THREAD2_CPU 8
+#define VIC_MASK 0x0FFF
 
 char *mem;
 char err_msg[] = "Invalid arguments, proper use: [victim setting] [attacker setting]\n\nVictim and Attacker Options:\nw - Writes\nr - Reads\nf - Flushes\n";
@@ -157,7 +158,7 @@ void *attacker(void *args) {
 	// Timing Instructions on the Same and Different Offsets to the Victim
 	uint64_t start, end;
 	unsigned char *ptr_diff = mem + 0xABCD; // Different address as victim
-	unsigned char *ptr_lower_match = mem + OFFSET + 0xA000; // Same lower 12 bits as victim
+	unsigned char *ptr_lower_match = mem + OFFSET; // Same lower 12 bits as victim
 
 	for (int i = 0; i < ITS; i++) {
 		start = rdtsc_begin();
@@ -186,7 +187,7 @@ void *victim(void *args) {
 	void (*instruction)(void*) = get_instruction(vic_setting);  // Testing instruction passed by inline options
 
 	// Forever Running Instructions in Victim Thread
-	unsigned char *ptr = mem + OFFSET;	
+	unsigned char *ptr = mem + (OFFSET & VIC_MASK);	
 	mfence();
 	while(1) {
 		instruction(ptr);
@@ -205,10 +206,10 @@ int main(int argc, char **argv[]) {
 		OFFSET = atoi(argv[3]);
 	}
 
-	mem = (unsigned char *)mmap(NULL, 50 * 4096, 
+	mem = (unsigned char *)mmap(NULL, 0xFF * 4096, 
 			PROT_READ | PROT_WRITE,
 			MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
-	memset(mem, 0x80, 50 * 4096);
+	memset(mem, 0x80, 0xFF * 4096);
 
 	// Launching Threads
 	pthread_t victim_thread, attacker_thread;
