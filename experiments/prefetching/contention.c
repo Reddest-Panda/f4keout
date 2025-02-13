@@ -206,7 +206,7 @@ int main(int argc, char **argv[]) {
 		OFFSET = atoi(argv[3]);
 	}
 
-	mem = (unsigned char *)mmap(NULL, 0xFF * 4096, 
+	mem = (unsigned char *)mmap(NULL, 0x100 * 4096, 
 			PROT_READ | PROT_WRITE,
 			MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
 	memset(mem, 0x80, 0xFF * 4096);
