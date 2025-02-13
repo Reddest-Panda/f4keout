@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from tqdm import tqdm
 
 #! --- Small class for Measurements --- !#
 
@@ -47,6 +48,9 @@ def graph_scenario(data, addrs):
     plt.scatter(addrs, data['diff_avg'].values, label='Diff', color='blue', linestyle='dotted')
     plt.scatter(addrs, data['lm_avg'], label='4k Aliasing', color='orange', linestyle='dotted')
 
+    hex_labels = [hex(addr) for addr in addrs]  # Format as hex (e.g., 0x1000)
+    plt.xticks(addrs, hex_labels, rotation=45)  # Rotate labels for better readability
+
     plt.legend()
     plt.savefig("data/addr_effect.png")
 
@@ -59,6 +63,10 @@ def graph_all(data, addrs):
 
         ax.scatter(addrs, scenario_data['diff_avg'].values, label='Diff', color='blue', linestyle='dotted')
         ax.scatter(addrs, scenario_data['lm_avg'], label='4k Aliasing', color='orange', linestyle='dotted')
+
+        hex_labels = [hex(addr) for addr in addrs]  # Format as hex (e.g., 0x1000)
+        ax.set_xticks(addrs)
+        ax.set_xticklabels(hex_labels, rotation=90)  # Rotate labels for better 
 
     # Add overarching row and column labels
     row_labels = ["Victim Flush", "Victim Read", "Victim Write", "Victim Mixed"]
@@ -81,7 +89,7 @@ def graph_all(data, addrs):
 #! --- Run Tests --- !#
 ITS = 25
 options = ['f', 'r', 'w', 'm']
-addrs = [n for n in range(0x000, 0x0005)] # Trying all offset values
+addrs = [n for n in range(0x000, 0x1000)] # Trying all offset values
 all_cases = [options, options, addrs]
 
 timestamp = datetime.now()
@@ -93,10 +101,10 @@ os.system("gcc -lpthread -w -O0 -o test contention.c")
 
 ## Collect Data
 data = pd.DataFrame(columns=["vic", "att", "addr", "diff_avg", "lm_avg"])
-# for vic, att, addr in itertools.product(*all_cases):
 vic = 'r'
 att = 'r'
-for addr in addrs:
+for vic, att, addr in tqdm(itertools.product(*all_cases), total=(len(options)*len(options)*len(addrs))): # Full sweep loop
+# for addr in tqdm(addrs):
     diff = []
     lm = []
     for _ in range(ITS):
@@ -111,4 +119,4 @@ os.system("rm test")
 
 ## Saving / Graphing
 data.to_csv(f"data/{timestamp_data}.csv")
-graph_scenario(data, addrs)
+graph_all(data, addrs)
