@@ -11,6 +11,9 @@
 //! ---- Variables ---- !//
 #define OFFSET 0x123
 #define ITS 5000
+#define THREAD1_CPU 0
+#define THREAD2_CPU 1
+
 
 char *mem;
 char err_msg[] = "Invalid arguments, proper use: [victim setting] [attacker setting]\n\nVictim and Attacker Options:\nw - Writes\nr - Reads\nf - Flushes\n";
@@ -149,7 +152,7 @@ void* get_instruction(char setting) {
 //! ---- Threads ---- !//
 void *attacker(void *args) {
 	// Setup
-	thread_setup(0); // Put on same physical core
+	thread_setup(THREAD1_CPU); // Put on same physical core
 	void (*instruction)(void*) = get_instruction(att_setting); // Testing instruction passed by inline options
 
 	// Timing Instructions on the Same and Different Offsets to the Victim
@@ -193,7 +196,7 @@ void *attacker(void *args) {
 }
 
 void *victim(void *args) {
-	thread_setup(8); // Put on same physical core
+	thread_setup(THREAD2_CPU); // Put on same physical core
 	void (*instruction)(void*) = get_instruction(vic_setting);  // Testing instruction passed by inline options
 
 	// Forever Running Instructions in Victim Thread
