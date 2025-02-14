@@ -1,2 +1,3 @@
-# Data Effect experiment
-Checks the effects the data stored at the address has on the cycles observed by the attacker
+# Data Effect Experiment
+Checks the effects of the data being acted upon
+Make sure to switch thread cpu ids in contention.c to be on same core.

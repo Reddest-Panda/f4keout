@@ -10,7 +10,10 @@
 
 //! ---- Variables ---- !//
 #define OFFSET 0x123
-#define ITS 5000
+#define ITS 500000
+#define THREAD1_CPU 0
+#define THREAD2_CPU 1
+
 
 char *mem;
 char err_msg[] = "Invalid arguments, proper use: [victim setting] [attacker setting]\n\nVictim and Attacker Options:\nw - Writes\nr - Reads\nf - Flushes\n";
@@ -149,31 +152,18 @@ void* get_instruction(char setting) {
 //! ---- Threads ---- !//
 void *attacker(void *args) {
 	// Setup
-	thread_setup(0); // Put on same physical core
+	thread_setup(THREAD1_CPU); // Put on same physical core
 	void (*instruction)(void*) = get_instruction(att_setting); // Testing instruction passed by inline options
 
 	// Timing Instructions on the Same and Different Offsets to the Victim
 	uint64_t start, end;
 	unsigned char *ptr_diff = mem + 0xABCD; // Different address as victim
-	unsigned char *ptr_same = mem + OFFSET; // Same address as victim
 	unsigned char *ptr_lower_match = mem + OFFSET + 0xA000; // Same lower 12 bits as victim
 
 	for (int i = 0; i < ITS; i++) {
 		start = rdtsc_begin();
 		mfence();
 		instruction(ptr_diff);
-		mfence();
-		end = rdtsc_end();
-		printf("%lu\n", end - start);
-	}
-
-	printf("|<END>|\n"); // Separater for data processing
-
-	for (int i = 0; i < ITS; i++) {
-		// Should be slow if theres contention
-		start = rdtsc_begin();
-		mfence();
-		instruction(ptr_same);
 		mfence();
 		end = rdtsc_end();
 		printf("%lu\n", end - start);
@@ -193,7 +183,7 @@ void *attacker(void *args) {
 }
 
 void *victim(void *args) {
-	thread_setup(8); // Put on same physical core
+	thread_setup(THREAD2_CPU); // Put on same physical core
 	void (*instruction)(void*) = get_instruction(vic_setting);  // Testing instruction passed by inline options
 
 	// Forever Running Instructions in Victim Thread
@@ -207,19 +197,22 @@ void *victim(void *args) {
 //! ---- Main ---- !//
 int main(int argc, char **argv[]) {
 	// Parameter Processing //
-	if (argc != 3) {
+	unsigned char VIC_VAL, ATT_VAL;
+	if (argc != 5) {
 		printf("%s", err_msg);
 		return EXIT_SUCCESS;
 	} else {
 		vic_setting = (char)argv[1][0];
 		att_setting = (char)argv[2][0];
+		VIC_VAL = (unsigned char)strtol(argv[3], NULL, 16);
+		ATT_VAL = (unsigned char)strtol(argv[4], NULL, 16);
 	}
-
 
 	mem = (unsigned char *)mmap(NULL, 50 * 4096, 
 			PROT_READ | PROT_WRITE,
 			MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
-	memset(mem, 0x80, 50 * 4096);
+	memset(mem, ATT_VAL, 50 * 4096); // Attacker region
+	memset(mem, VIC_VAL, 9 * 4096); // Victim region
 
 	// Launching Threads
 	pthread_t victim_thread, attacker_thread;
