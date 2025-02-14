@@ -10,7 +10,7 @@
 
 //! ---- Variables ---- !//
 #define OFFSET 0x123
-#define ITS 5000
+#define ITS 50000
 #define THREAD1_CPU 0
 #define THREAD2_CPU 8
 
@@ -158,25 +158,12 @@ void *attacker(void *args) {
 	// Timing Instructions on the Same and Different Offsets to the Victim
 	uint64_t start, end;
 	unsigned char *ptr_diff = mem + 0xABCD; // Different address as victim
-	unsigned char *ptr_same = mem + OFFSET; // Same address as victim
 	unsigned char *ptr_lower_match = mem + OFFSET + 0xA000; // Same lower 12 bits as victim
 
 	for (int i = 0; i < ITS; i++) {
 		start = rdtsc_begin();
 		mfence();
 		instruction(ptr_diff);
-		mfence();
-		end = rdtsc_end();
-		printf("%lu\n", end - start);
-	}
-
-	printf("|<END>|\n"); // Separater for data processing
-
-	for (int i = 0; i < ITS; i++) {
-		// Should be slow if theres contention
-		start = rdtsc_begin();
-		mfence();
-		instruction(ptr_same);
 		mfence();
 		end = rdtsc_end();
 		printf("%lu\n", end - start);
