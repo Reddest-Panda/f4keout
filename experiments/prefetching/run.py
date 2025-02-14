@@ -103,7 +103,7 @@ os.system("gcc -lpthread -w -O0 -o test contention.c")
 data = pd.DataFrame(columns=["vic", "att", "addr", "diff_avg", "lm_avg"])
 vic = 'r'
 att = 'r'   # Just attempting on one scenario for quicker results
-for vic, att, addr in tqdm(itertools.product(*all_cases)): # Full sweep loop
+for vic, att, addr in tqdm(itertools.product(*all_cases), total=(len(options)*len(options)*len(addrs))): # Full sweep loop
 # for addr in tqdm(addrs):
     diff = []
     lm = []
@@ -112,7 +112,6 @@ for vic, att, addr in tqdm(itertools.product(*all_cases)): # Full sweep loop
         readings = read_data(f'data/tmp/{vic}-{att}')
         diff.extend(readings[0])
         lm.extend(readings[1])
-        time.sleep(0.2) # Buffer
     diff_avg, lm_avg = process(diff, lm)
     data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
 

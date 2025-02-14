@@ -71,7 +71,7 @@ def graph_all(data, name="prefetching"):
 
     # Adjust layout
     plt.tight_layout(rect=[0.05, 0.05, 1, 0.95])
-    plt.savefig("data/plots/prefetching.png")
+    plt.savefig("data/plots/contention.png")
 
 
 #! --- Run Tests --- !#
