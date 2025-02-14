@@ -11,7 +11,7 @@
 //! ---- Variables ---- !//
 #define ITS 50000
 #define THREAD1_CPU 0
-#define THREAD2_CPU 8
+#define THREAD2_CPU 1
 #define VIC_MASK 0x0FFF
 
 char *mem;
@@ -65,6 +65,14 @@ static inline __attribute__((always_inline)) void writes(void *ptr) {
         "mov %%r14, 0x5000(%0)\n\t"	
         "mov %%r14, 0x6000(%0)\n\t"
         "mov %%r14, 0x7000(%0)\n\t"
+        "mov %%r14, 0x8000(%0)\n\t"
+        "mov %%r14, 0x9000(%0)\n\t"
+        "mov %%r14, 0xA000(%0)\n\t"
+        "mov %%r14, 0xB000(%0)\n\t"
+        "mov %%r14, 0xC000(%0)\n\t"
+        "mov %%r14, 0xD000(%0)\n\t"
+        "mov %%r14, 0xE000(%0)\n\t"
+        "mov %%r14, 0xF000(%0)\n\t"
         :
         : "r" (ptr)
         : 
@@ -81,6 +89,14 @@ static inline __attribute__((always_inline)) void reads(void *ptr) {
         "mov 0x5000(%0), %%r15\n\t" 
         "mov 0x6000(%0), %%r15\n\t" 
         "mov 0x7000(%0), %%r15\n\t"
+        "mov 0x8000(%0), %%r15\n\t"
+        "mov 0x9000(%0), %%r15\n\t"
+        "mov 0xA000(%0), %%r15\n\t"
+        "mov 0xB000(%0), %%r15\n\t"
+        "mov 0xC000(%0), %%r15\n\t"
+        "mov 0xD000(%0), %%r15\n\t"
+        "mov 0xE000(%0), %%r15\n\t"
+        "mov 0xF000(%0), %%r15\n\t"
         :
         : "r" (ptr)
         : 
@@ -93,10 +109,18 @@ static inline __attribute__((always_inline)) void mixed(void *ptr) {
         "mov 0x2000(%0), %%r15\n\t" 
         "mov 0x4000(%0), %%r15\n\t"
         "mov 0x6000(%0), %%r15\n\t"
+        "mov 0x8000(%0), %%r15\n\t"
+        "mov 0xA000(%0), %%r15\n\t"
+        "mov 0xC000(%0), %%r15\n\t"
+        "mov 0xE000(%0), %%r15\n\t"
         "mov %%r14, 0x1000(%0)\n\t"
         "mov %%r14, 0x3000(%0)\n\t"	
         "mov %%r14, 0x5000(%0)\n\t"	
         "mov %%r14, 0x7000(%0)\n\t"
+        "mov %%r14, 0x9000(%0)\n\t"
+        "mov %%r14, 0xB000(%0)\n\t"
+        "mov %%r14, 0xD000(%0)\n\t"
+        "mov %%r14, 0xF000(%0)\n\t"
         : 
         : "r" (ptr)
         :
@@ -113,6 +137,14 @@ static inline __attribute__((always_inline)) void flushes(void *ptr) {
         "clflush 0x5000(%0)\n\t" 
         "clflush 0x6000(%0)\n\t" 
         "clflush 0x7000(%0)\n\t"
+        "clflush 0x8000(%0)\n\t"
+        "clflush 0x9000(%0)\n\t"
+        "clflush 0xA000(%0)\n\t"
+        "clflush 0xB000(%0)\n\t"
+        "clflush 0xC000(%0)\n\t"
+        "clflush 0xD000(%0)\n\t"
+        "clflush 0xE000(%0)\n\t"
+        "clflush 0xF000(%0)\n\t"
         : 
         : "r" (ptr)
         :
@@ -187,7 +219,7 @@ void *victim(void *args) {
 	void (*instruction)(void*) = get_instruction(vic_setting);  // Testing instruction passed by inline options
 
 	// Forever Running Instructions in Victim Thread
-	unsigned char *ptr = mem + (OFFSET & VIC_MASK);	
+	unsigned char *ptr = mem + (OFFSET & VIC_MASK) + 0x7000;	
 	mfence();
 	while(1) {
 		instruction(ptr);

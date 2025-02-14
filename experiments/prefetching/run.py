@@ -88,7 +88,7 @@ def graph_all(data, addrs):
 #! --- Run Tests --- !#
 ITS = 25
 options = ['f', 'r', 'w', 'm']
-addrs = [n for n in range(0x123, 0x15123, 0x01000)] # Trying all offset values
+addrs = [n for n in range(0x123, 0x25123, 0x01000)] # Trying all offset values
 all_cases = [options, options, addrs]
 
 timestamp = datetime.now()
@@ -111,10 +111,6 @@ for vic, att, addr in tqdm(itertools.product(*all_cases), total=(len(options)*le
         readings = read_data(f'data/tmp/{vic}-{att}')
         diff.extend(readings[0])
         lm.extend(readings[1])
-<<<<<<< HEAD
-        # time.sleep(0.2) # Buffer
-=======
->>>>>>> 363817589c938385fa1e5962188753a24a8cbb40
     diff_avg, lm_avg = process(diff, lm)
     data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
 
