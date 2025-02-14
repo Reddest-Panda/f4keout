@@ -111,7 +111,10 @@ for vic, att, addr in tqdm(itertools.product(*all_cases), total=(len(options)*le
         readings = read_data(f'data/tmp/{vic}-{att}')
         diff.extend(readings[0])
         lm.extend(readings[1])
+<<<<<<< HEAD
         # time.sleep(0.2) # Buffer
+=======
+>>>>>>> 363817589c938385fa1e5962188753a24a8cbb40
     diff_avg, lm_avg = process(diff, lm)
     data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
 
