@@ -10,8 +10,8 @@
 
 //! ---- Variables ---- !//
 #define ITS 50000
-#define THREAD1_CPU 0
-#define THREAD2_CPU 8
+#define THREAD1_CPU 12
+#define THREAD2_CPU 13
 
 char *mem;
 char err_msg[] = "Invalid arguments, proper use: [victim setting] [attacker setting]\n\nVictim and Attacker Options:\nw - Writes\nr - Reads\nf - Flushes\n";
