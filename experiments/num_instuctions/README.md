@@ -1,2 +1,2 @@
-# Prefetching experiment
-Checks if the victim thread prefetches a batch of addresses with matching lower 12 bits
+# Number of instructions experiment
+Checks what changing the number of instructions does
