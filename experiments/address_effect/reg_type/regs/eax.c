@@ -72,14 +72,14 @@ static inline __attribute__((always_inline)) void writes(char *ptr) { //! CHANGE
 
 static inline __attribute__((always_inline)) void reads(char *ptr) { //! CHANGE
 	asm volatile (
-        "mov 0x0000(%0), %%rax\n\t"
-        "mov 0x1000(%0), %%rax\n\t" 
-        "mov 0x2000(%0), %%rax\n\t" 
-        "mov 0x3000(%0), %%rax\n\t" 
-        "mov 0x4000(%0), %%rax\n\t" 
-        "mov 0x5000(%0), %%rax\n\t" 
-        "mov 0x6000(%0), %%rax\n\t" 
-        "mov 0x7000(%0), %%rax\n\t"
+        "mov 0x0000(%0), %%eax\n\t"
+        "mov 0x1000(%0), %%eax\n\t" 
+        "mov 0x2000(%0), %%eax\n\t" 
+        "mov 0x3000(%0), %%eax\n\t" 
+        "mov 0x4000(%0), %%eax\n\t" 
+        "mov 0x5000(%0), %%eax\n\t" 
+        "mov 0x6000(%0), %%eax\n\t" 
+        "mov 0x7000(%0), %%eax\n\t"
         :
         : "b" (ptr)
         : 
