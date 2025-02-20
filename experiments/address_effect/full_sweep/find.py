@@ -84,7 +84,7 @@ def partial_addr_heat_map(data, name):
 
 # Thresh is chosen through observation of graph and is therefore imperfect
 scenarios = [Scenario('Vr-Ar', 0, 150), Scenario('Vr-Aw', 1, 200), Scenario('Vw-Ar', 2, 160), Scenario('Vw-Aw', 3, 210)]
-sep_data = parse_data(pd.read_csv("data/13_02_2025_15:32:33.csv"))
+sep_data = parse_data(pd.read_csv("data/csvs/13_02_2025_15:32:33.csv"))
 for case in scenarios:
     full_addr_heat_map(sep_data[case.index], case.name)
     partial_addr_heat_map(sep_data[case.index], case.name)
