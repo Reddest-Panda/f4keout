@@ -66,9 +66,6 @@ def graph_all(data, name="prefetching"):
     for ax, row_label in zip(axes[:, 0], row_labels):
         ax.set_ylabel(row_label, rotation="vertical", labelpad=40, fontsize=14, va='center')
 
-    # Add common x-axis and y-axis labels
-    fig.text(0.5, 0.04, "Offset", ha="center", fontsize=14)
-
     # Adjust layout
     plt.tight_layout(rect=[0.05, 0.05, 1, 0.95])
     plt.savefig("data/plots/contention.png")

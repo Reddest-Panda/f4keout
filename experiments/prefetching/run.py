@@ -88,7 +88,7 @@ def graph_all(data, addrs):
 #! --- Run Tests --- !#
 ITS = 25
 options = ['f', 'r', 'w', 'm']
-addrs = [n for n in range(0x123, 0x25123, 0x01000)] # Trying all offset values
+addrs = [n for n in range(0x120, 0x25120, 0x01000)] # Trying all offset values
 all_cases = [options, options, addrs]
 
 timestamp = datetime.now()
