@@ -86,9 +86,8 @@ def graph_all(data, addrs):
     plt.savefig("data/prefetching.png")
 
 #! --- Run Tests --- !#
-ITS = 25
 options = ['f', 'r', 'w', 'm']
-addrs = [n for n in range(0x120, 0x25120, 0x01000)] # Trying all offset values
+addrs = [n for n in range(0x123, 0x31123, 0x01000)] # Trying all offset values
 all_cases = [options, options, addrs]
 
 timestamp = datetime.now()
@@ -96,26 +95,20 @@ timestamp_data = timestamp.strftime('%d') + '_' + timestamp.strftime('%m') + '_'
 
 ## Setup for data collection
 os.makedirs('data/tmp', exist_ok=True)
+os.makedirs('data/csvs', exist_ok=True)
+os.makedirs('data/plots', exist_ok=True)
 os.system("gcc -lpthread -w -O0 -o test contention.c")
 
 ## Collect Data
 data = pd.DataFrame(columns=["vic", "att", "addr", "diff_avg", "lm_avg"])
-vic = 'r'
-att = 'r'   # Just attempting on one scenario for quicker results
-for vic, att, addr in tqdm(itertools.product(*all_cases), total=(len(options)*len(options)*len(addrs))): # Full sweep loop
-# for addr in tqdm(addrs):
-    diff = []
-    lm = []
-    for _ in range(ITS):
-        os.system(f"./test {vic} {att} {addr} > data/tmp/{vic}-{att}")
-        readings = read_data(f'data/tmp/{vic}-{att}')
-        diff.extend(readings[0])
-        lm.extend(readings[1])
-    diff_avg, lm_avg = process(diff, lm)
+for vic, att, addr in tqdm(itertools.product(*all_cases), total=(len(options)*len(options)*len(addrs))):
+    os.system(f"./test {vic} {att} {addr} > data/tmp/{vic}-{att}")
+    readings = read_data(f'data/tmp/{vic}-{att}')
+    diff_avg, lm_avg = process(readings[0], readings[1])
     data = pd.concat([data, pd.DataFrame([[vic, att, addr, diff_avg, lm_avg]], columns=data.columns)], ignore_index=True) # appending row of data
 
 os.system("rm test")
 # ## Saving / Graphing
-data.to_csv(f"data/{timestamp_data}.csv")
+data.to_csv(f"data/csvs/{timestamp_data}.csv")
 # data = pd.read_csv("data/all_same_core.csv")
 graph_all(data, addrs)

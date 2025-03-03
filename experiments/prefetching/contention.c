@@ -28,14 +28,15 @@ static inline __attribute__((always_inline)) void mfence() {
 static inline __attribute__((always_inline)) uint64_t rdtsc_begin() {
         uint64_t a, d;
         asm volatile(
-                        "CPUID\n\t"
-                        "RDTSCP\n\t"
-                        "mov %%rdx, %0\n\t"
-                        "mov %%rax, %1\n\t"
-			
-                        : "=r" (d), "=r" (a)
-                        :
-                        : "%rax", "%rbx", "%rcx", "%rdx");
+            "mfence\n\t"
+            "CPUID\n\t"
+            "RDTSCP\n\t"
+            "mov %%rdx, %0\n\t"
+            "mov %%rax, %1\n\t"
+            "mfence\n\t"
+            : "=r" (d), "=r" (a)
+            :
+            : "%rax", "%rbx", "%rcx", "%rdx");
         a = (d << 32) | a;
         return a;
 }
@@ -43,14 +44,15 @@ static inline __attribute__((always_inline)) uint64_t rdtsc_begin() {
 static inline __attribute__((always_inline)) uint64_t rdtsc_end() {
         uint64_t a, d;
         asm volatile(
-                        "RDTSCP\n\t"
-                        "mov %%rdx, %0\n\t"
-                        "mov %%rax, %1\n\t"
-                        "CPUID\n\t"
-			
-                        : "=r" (d), "=r" (a)
-                        :
-                        : "%rax", "%rbx", "%rcx", "%rdx");
+            "mfence\n\t"
+            "RDTSCP\n\t"
+            "mov %%rdx, %0\n\t"
+            "mov %%rax, %1\n\t"
+            "CPUID\n\t"
+            "mfence\n\t"
+            : "=r" (d), "=r" (a)
+            :
+            : "%rax", "%rbx", "%rcx", "%rdx");
         a = (d << 32) | a;
         return a;
 }
@@ -194,9 +196,7 @@ void *attacker(void *args) {
 
 	for (int i = 0; i < ITS; i++) {
 		start = rdtsc_begin();
-		mfence();
 		instruction(ptr_diff);
-		mfence();
 		end = rdtsc_end();
 		printf("%lu\n", end - start);
 	}
@@ -206,9 +206,7 @@ void *attacker(void *args) {
 	for (int i = 0; i < ITS; i++) {
 		// Should be slow if theres contention
 		start = rdtsc_begin();
-		mfence();
 		instruction(ptr_lower_match);
-		mfence();
 		end = rdtsc_end();
 		printf("%lu\n", end - start);
 	}
@@ -219,7 +217,7 @@ void *victim(void *args) {
 	void (*instruction)(void*) = get_instruction(vic_setting);  // Testing instruction passed by inline options
 
 	// Forever Running Instructions in Victim Thread
-	unsigned char *ptr = mem + (OFFSET & VIC_MASK) + 0x7000;	
+	unsigned char *ptr = mem + (OFFSET & VIC_MASK) + 0x15000;	
 	mfence();
 	while(1) {
 		instruction(ptr);
