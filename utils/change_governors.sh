@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Change to max core number
-for X in $(seq 0 23);
+for X in $(seq $1 $2);
 do
-    cpufreq-set -g $1 -c $X
+    cpufreq-set -g $3 -c $X
 done
 
 # Validate successful change
